@@ -2,23 +2,38 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Text;
 
     using Google.ProtocolBuffers.Compiler.PluginProto;
     using Google.ProtocolBuffers.DescriptorProtos;
 
+    using YamlDotNet.Serialization.NamingConventions;
+
     public class Generator
     {
         private readonly GeneratorOptions options;
+        private readonly Dictionary<string, string> converters;
 
-        private Generator(GeneratorOptions options)
+        private Generator(GeneratorOptions options, Dictionary<string, string> converters)
         {
             this.options = options;
+            this.converters = converters;
         }
 
         public static Generator CreateGenerator(GeneratorOptions options)
         {
-            return new Generator(options);
+            var converters = new Dictionary<string, string>();
+            if (options.ConverterPath != null)
+            {
+                using (var sr = File.OpenText(options.ConverterPath))
+                {
+                    var deserializer = new YamlDotNet.Serialization.Deserializer(null, new NullNamingConvention(), false);
+                    converters = deserializer.Deserialize<Dictionary<string, string>>(sr);
+                }
+            }
+
+            return new Generator(options, converters);
         }
 
         public void Generate(CodeGeneratorRequest request, CodeGeneratorResponse.Builder response)
@@ -147,17 +162,17 @@
             return new String(' ', indent * 4);
         }
 
-        private static void BuildMessageList(IList<DescriptorProto> messageTypeList, StringBuilder sb, int indent, ref bool firstChild)
+        private void BuildMessageList(IList<DescriptorProto> messageTypeList, StringBuilder sb, int indent, ref bool firstChild)
         {
             foreach (var message in messageTypeList)
             {
-                if (!firstChild)
-                {
-                    sb.AppendLine();
-                }
-
                 if (message.NestedTypeCount > 0 || message.EnumTypeCount > 0)
                 {
+                    if (!firstChild)
+                    {
+                        sb.AppendLine();
+                    }
+
                     sb.AppendLine(Indent(indent) + string.Format("module {0} {{", message.Name));
 
                     bool firstNestedChild = true;
@@ -179,7 +194,7 @@
                 foreach (var field in message.FieldList)
                 {
                     string type = "any";
-                    bool isAmbiguous = true;
+                    bool documentOriginalType = true;
                     switch (field.Type)
                     {
                         case FieldDescriptorProto.Types.Type.TYPE_DOUBLE:
@@ -198,28 +213,38 @@
                             break;
                         case FieldDescriptorProto.Types.Type.TYPE_BOOL:
                             type = "boolean";
-                            isAmbiguous = false;
+                            documentOriginalType = false;
                             break;
                         case FieldDescriptorProto.Types.Type.TYPE_STRING:
                             type = "string";
-                            isAmbiguous = false;
+                            documentOriginalType = false;
                             break;
                         case FieldDescriptorProto.Types.Type.TYPE_GROUP:
                             break;
                         case FieldDescriptorProto.Types.Type.TYPE_MESSAGE:
                         case FieldDescriptorProto.Types.Type.TYPE_ENUM:
                             type = field.TypeName.TrimStart('.');
-                            isAmbiguous = false;
+                            documentOriginalType = false;
                             break;
                         case FieldDescriptorProto.Types.Type.TYPE_BYTES:
                             // will be sent as base64
                             type = "string";
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new ArgumentOutOfRangeException("field.type", field.Type, "Unknown FieldDescriptorProto.Types.Type");
                     }
 
-                    if (isAmbiguous)
+                    if (field.Type == FieldDescriptorProto.Types.Type.TYPE_MESSAGE && this.converters != null)
+                    {
+                        string requestedType;
+                        if (this.converters.TryGetValue(type, out requestedType))
+                        {
+                            type = requestedType;
+                            documentOriginalType = true;
+                        }
+                    }
+
+                    if (documentOriginalType)
                     {
                         sb.Append(Indent(indent) + "    /** ");
                         sb.Append(field.Type);

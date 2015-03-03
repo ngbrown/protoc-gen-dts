@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Text.RegularExpressions;
 
     public class GeneratorOptions
@@ -11,6 +12,10 @@
         public bool Combined { get; set; }
         public string OutputPath { get; set; }
         public string Namespace { get; set; }
+        public string ConverterPath { get; set; }
+
+        private const string DefaultOutputPath = "protobuf.d.ts";
+        private const string DefaultConverterPath = "dtsconverters.yaml";
 
         public GeneratorOptions()
         {
@@ -35,8 +40,13 @@
                 }
                 else
                 {
-                    this.OutputPath = "protobuf.d.ts";
+                    this.OutputPath = DefaultOutputPath;
                 }
+            }
+
+            if (this.ConverterPath == null && File.Exists(DefaultConverterPath))
+            {
+                this.ConverterPath = DefaultConverterPath;
             }
 
             if (tmpReasons.Count != 0)
@@ -82,6 +92,15 @@
                     else if (name.Equals("namespace", StringComparison.InvariantCultureIgnoreCase))
                     {
                         this.Namespace = value;
+                    }
+                    else if (name.Equals("converter", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (File.Exists(value) == false)
+                        {
+                            tmpReasons.Add("Specified converter file '" + value + "' does not exist.");
+                        }
+
+                        this.ConverterPath = value;
                     }
                     else
                     {

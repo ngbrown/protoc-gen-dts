@@ -1,0 +1,18 @@
+// sample.proto
+
+package samplePackage;
+
+message SampleMessage {
+    optional string sample_field = 1;
+    optional ProtoDateTime = 2;
+}
+
+message ProtoDateTime {
+    required int32 year = 1;                            // 1 through 9999
+    required int32 month = 2;                           // 1 through 12
+    required int32 day = 3;                             // 1 through 31
+    optional int32 hour = 4         [default = 0];      // 0 through 23
+    optional int32 minute = 5       [default = 0];      // 0 through 59
+    optional int32 second = 6       [default = 0];      // 0 through 59
+    optional int32 millisecond = 7  [default = 0];      // 0 through 999
+}

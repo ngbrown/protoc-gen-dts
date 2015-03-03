@@ -1,0 +1,6 @@
+# Use this if you are using a compact binary format to transport a structure, but expand to text
+# for json.
+# List proto target type to typescript target type as a collection of mapped scalars to scalars.
+
+ProtoDateTime:		string
+ProtoGuid:			string

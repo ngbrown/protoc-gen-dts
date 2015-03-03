@@ -14,8 +14,9 @@ You may specify parameters on the command-line by placing it before the output d
 Arguments:
   saverequest=<filename>   save the CodeGeneratorRequest to a file for debugging.
   combined=<true|false>    combines into one file.  Default is false.  If true, specify output.
-  output=<filename>        defaults to the namespace or protobuf.d.ts.
+  output=<filename[.d.ts]> defaults to the namespace or protobuf.d.ts.
   namespace=<someApi>      defaults to no wrapping module
+  converters=<file.yaml> defaults to 'dtsconverters.yaml'
 ```
 
 ## Example

@@ -111,8 +111,9 @@
             tmpReasons.Add("Arguments:");
             tmpReasons.Add("  saverequest=<filename>   save the CodeGeneratorRequest to a file for debugging.");
             tmpReasons.Add("  combined=<true|false>    combines into one file.  Default is false.  If true, specify output.");
-            tmpReasons.Add("  output=<filename>        defaults to the namespace or protobuf.d.ts.");
+            tmpReasons.Add("  output=<filename[.d.ts]> defaults to the namespace or protobuf.d.ts.");
             tmpReasons.Add("  namespace=<someApi>      defaults to no wrapping module");
+            tmpReasons.Add("  converters=<file.yaml> defaults to 'dtsconverters.yaml'");
             
             return BuildMessage(tmpReasons);
         }
