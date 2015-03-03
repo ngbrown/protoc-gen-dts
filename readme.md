@@ -23,7 +23,7 @@ Arguments:
 
 ### Step 1: Create `sample.proto`
 
-```
+```protobuf
 // sample.proto
 
 package samplePackage;
@@ -35,6 +35,17 @@ message SampleMessage {
 
 ### Step 2: Convert `sample.proto` to binary format DescriptorProtoSet.
 
+```bat
+> set Path=%Path%;pathto_protoc-gen-dts
+> protoc sample.proto --dts_out=.
 ```
-protoc sample.proto --dts_out=.
+
+Results in `sample.d.ts`:
+
+```ts
+// Generated with protoc-gen-ts.  DO NOT EDIT!
+
+interface SampleMessage {
+    sample_field?: string;
+}
 ```

@@ -4,7 +4,7 @@ package samplePackage;
 
 message SampleMessage {
     optional string sample_field = 1;
-    optional ProtoDateTime = 2;
+    optional ProtoDateTime date_time_field = 2;
 }
 
 message ProtoDateTime {

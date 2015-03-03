@@ -2,5 +2,5 @@
 # for json.
 # List proto target type to typescript target type as a collection of mapped scalars to scalars.
 
-ProtoDateTime:		string
-ProtoGuid:			string
+samplePackage.ProtoDateTime:		string
+samplePackage.ProtoGuid:			string
